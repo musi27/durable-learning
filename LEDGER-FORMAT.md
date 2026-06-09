@@ -2,6 +2,17 @@
 
 `LEDGER.md` is the source of truth for what the learner can do, how confidently we know it, and what to teach next. It replaces both "learning records" and any invisible model of the learner. If it isn't in the ledger, the system doesn't know it.
 
+## File header
+
+The ledger begins with:
+
+```md
+# Capability Ledger
+protocol: 1
+```
+
+The `protocol:` line ties the workspace to the ledger syntax version this skill expects. The linter warns when it is missing, flags older versions (migration may be needed), and refuses newer ones — a newer number means the workspace was created by a newer skill, so update the skill rather than hand-editing the ledger.
+
 ## Capability levels
 
 | Level | Name | Meaning | Minimum evidence |

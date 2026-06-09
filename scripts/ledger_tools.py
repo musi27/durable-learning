@@ -28,7 +28,10 @@ try:
 except ImportError:
     retrievability = None
 
+PROTOCOL_VERSION = 1
+
 NODE_RE = re.compile(r"^###\s+(N\d+)\s*[·:\-]\s*(.+?)\s*$")
+PROTOCOL_RE = re.compile(r"^protocol:\s*(\d+)\s*$")
 FIELD_RE = re.compile(r"^-\s+(\w[\w-]*):\s*(.*)$")
 DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 FSRS_RE = re.compile(
@@ -39,17 +42,22 @@ EMPTY_VALUES = {"", "—", "-", "none", "n/a"}
 
 
 def parse_ledger(path):
-    """Return (nodes: dict, agency: list of (date_str, line), problems: list)."""
+    """Return (nodes, agency, problems, protocol_version)."""
     nodes, agency, problems = {}, [], []
+    protocol = None
     current = None
     in_agency = False
     try:
         lines = open(path, encoding="utf-8").read().splitlines()
     except FileNotFoundError:
-        return nodes, agency, [("error", f"{path} not found")]
+        return nodes, agency, [("error", f"{path} not found")], protocol
 
     for ln, raw in enumerate(lines, 1):
         line = raw.rstrip()
+        pm = PROTOCOL_RE.match(line)
+        if pm and protocol is None:
+            protocol = int(pm.group(1))
+            continue
         if line.startswith("## "):
             in_agency = "agency log" in line.lower()
             current = None
@@ -81,7 +89,7 @@ def parse_ledger(path):
         em = re.match(r"^\s+-\s+(\d{4}-\d{2}-\d{2})", line)
         if em:
             current["evidence_dates"].append(em.group(1))
-    return nodes, agency, problems
+    return nodes, agency, problems, protocol
 
 
 def node_level(node):
@@ -166,9 +174,24 @@ def node_state(node, nodes, today):
 
 def cmd_check(args):
     today = date.today()
-    nodes, agency, problems = parse_ledger(args.ledger)
+    nodes, agency, problems, protocol = parse_ledger(args.ledger)
     errors = [p for p in problems if p[0] == "error"]
     warnings = [p for p in problems if p[0] == "warning"]
+
+    if protocol is None:
+        warnings.append(("warning",
+                         "no 'protocol:' line in header — add 'protocol: "
+                         f"{PROTOCOL_VERSION}' (see LEDGER-FORMAT.md)"))
+    elif protocol > PROTOCOL_VERSION:
+        errors.append(("error",
+                       f"ledger protocol v{protocol} is newer than this skill "
+                       f"supports (v{PROTOCOL_VERSION}) — update the skill, "
+                       "don't edit the ledger"))
+    elif protocol < PROTOCOL_VERSION:
+        warnings.append(("warning",
+                         f"ledger protocol v{protocol} predates the skill's "
+                         f"v{PROTOCOL_VERSION} — check LEDGER-FORMAT.md for "
+                         "migration notes"))
 
     for nid, node in nodes.items():
         lvl = node_level(node)
@@ -225,7 +248,7 @@ STATE_STYLE = {
 
 def cmd_map(args):
     today = date.today()
-    nodes, agency, problems = parse_ledger(args.ledger)
+    nodes, agency, problems, _protocol = parse_ledger(args.ledger)
     if any(p[0] == "error" for p in problems):
         print("ledger has parse errors - run `check` first", file=sys.stderr)
 
