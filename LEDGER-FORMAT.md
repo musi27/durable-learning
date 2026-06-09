@@ -68,6 +68,10 @@ Bottom of the ledger:
 
 Definition of a reach-event and all framing rules: [AGENCY.md](./AGENCY.md). Per-node counts are mirrored in the node's `reaches` line.
 
+## Machine checking
+
+The ledger format above is machine-checked. `python3 scripts/ledger_tools.py check` validates node ids, prereq references (existence and cycles), level fields, fsrs lines, and dates — run it at every session open and fix errors before anything else. Keep the field syntax exactly as shown in the node entry template; the linter and the map renderer both parse it.
+
 ## Map view
 
-At session close, optionally regenerate `map.html` — a single self-contained HTML view of the ledger: slices as columns, nodes colored by state (unstarted / frontier / verified / due), agency trend in a corner. Same training-log tone as everything else.
+At session close, run `python3 scripts/ledger_tools.py map` to regenerate `map.html` — a single self-contained HTML view of the ledger: slices as columns, nodes colored by state (unstarted / frontier / verified / due / knowledge-only), current retrievability per node, agency trend at the bottom. Same training-log tone as everything else. This is the learner's progress view; it is not optional.

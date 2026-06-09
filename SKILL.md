@@ -59,4 +59,6 @@ Never trust your parametric knowledge for teaching content. Before `RESOURCES.md
 
 ## Running a session
 
-Every session follows [SESSION-PROTOCOL.md](./SESSION-PROTOCOL.md): re-entry → review block → teaching block → close. Cold-start and comeback variants are defined there. Scheduling math is done by `scripts/fsrs.py` — never compute intervals or retrievability by hand.
+**Read [AGENT-BRIEF.md](./AGENT-BRIEF.md) in full at the start of every session** — it is the one-page invariants card; the other docs are reference. Every session follows [SESSION-PROTOCOL.md](./SESSION-PROTOCOL.md): re-entry → review block → teaching block → close, with cold-start and comeback variants.
+
+Tooling, non-negotiable: scheduling math through `scripts/fsrs.py` (never hand-computed); `scripts/ledger_tools.py check` at session open (the ledger is load-bearing — drift must be caught, not discovered); `scripts/ledger_tools.py map` at close so the learner always has a current map.html. Sessions end with a one-line protocol self-audit in `NOTES.md` (see AGENT-BRIEF.md §16).

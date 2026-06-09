@@ -47,16 +47,20 @@ Coach physical form or anything it can't observe where errors cost health or mon
 
 ```
 durable-learning/
-  SKILL.md             entry point — philosophy, roles, workspace map
-  SESSION-PROTOCOL.md  cold-start / standard / comeback session shapes
-  LEDGER-FORMAT.md     capability nodes, levels, FSRS fields, frontier rule
-  PROBE-PROTOCOL.md    Assessor mode — rubric, fresh-context grading, evidence rules
-  AGENCY.md            attempt-first contract, reach-events, framing rules
-  MISSION-FORMAT.md    mission template + the scope gate
-  scripts/fsrs.py      vendored FSRS-6 scheduler (stdlib only)
+  SKILL.md                entry point — philosophy, roles, workspace map
+  AGENT-BRIEF.md          one-page invariants card, re-read every session
+  SESSION-PROTOCOL.md     cold-start / standard / comeback session shapes
+  LEDGER-FORMAT.md        capability nodes, levels, FSRS fields, frontier rule
+  PROBE-PROTOCOL.md       Assessor mode — rubric, fresh-context grading, evidence rules
+  AGENCY.md               attempt-first contract, reach-events, framing rules
+  MISSION-FORMAT.md       mission template + the scope gate
+  scripts/fsrs.py         vendored FSRS-6 scheduler (stdlib only)
+  scripts/ledger_tools.py ledger linter (`check`) + progress map renderer (`map`)
 ```
 
-Your learning workspace (created lazily, per topic): `MISSION.md`, `LEDGER.md`, `GLOSSARY.md`, `RESOURCES.md`, `NOTES.md`, `NEXT.md`, plus `lessons/`, `reference/`, and `probes/`. All plain files — inspectable, editable, yours to version-control.
+Your learning workspace (created lazily, per topic): `MISSION.md`, `LEDGER.md`, `GLOSSARY.md`, `RESOURCES.md`, `NOTES.md`, `NEXT.md`, `map.html`, plus `lessons/`, `reference/`, and `probes/`. All plain files — inspectable, editable, yours to version-control.
+
+Three reliability mechanisms keep long-running workspaces honest: the agent re-reads the one-page brief every session (long protocols drift; a card doesn't), the ledger is machine-linted at session open (everything downstream trusts it), and every session closes with a one-line protocol self-audit in `NOTES.md` — silent drift is the failure mode, so the protocol makes drift speak.
 
 ## Install & run
 

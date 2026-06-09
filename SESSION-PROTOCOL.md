@@ -26,7 +26,7 @@ State the split in `NEXT.md` so the learner always knows what kind of session th
 
 ### 1. Re-entry (≤5 min)
 
-Read `NEXT.md` and `LEDGER.md`. Open with the mission, then the map state: what's verified, what's due, what's next. Ask about the homework/assignment from `NEXT.md`.
+Read [AGENT-BRIEF.md](./AGENT-BRIEF.md), then `NEXT.md` and `LEDGER.md`. Run `python3 scripts/ledger_tools.py check` — fix any errors before proceeding (the ledger is load-bearing; a corrupted fsrs line or dangling prereq silently breaks the frontier). It also lists what's due. Open with the mission, then the map state: what's verified, what's due, what's next. Ask about the homework/assignment from `NEXT.md`.
 
 **Diff teach-back** (project missions): if the project changed since last session, have the learner walk you through the diff — "explain anything you shipped." Code or work they explain well is free generative evidence (record it). Anything they *can't* explain is not shame — it is a **frontier signal**: maximally mission-relevant teaching material, because they already shipped it. Rationale line: "you shipped it; let's make sure you own it."
 
@@ -52,7 +52,8 @@ Same-session assessment caps at L2 (see [PROBE-PROTOCOL.md](./PROBE-PROTOCOL.md)
 1. Learner writes a one-line takeaway (in their words — this is retrieval, not ceremony).
 2. Update `LEDGER.md`: evidence events, FSRS fields (via script), agency log.
 3. Write `NEXT.md`: planned frontier node, due re-probes, **one midweek artifact assignment** tied to the mission (code to write, swatch to crochet, paragraph to compose — something inspectable), and optionally a 5-minute self-quiz (3–5 free-recall prompts).
-4. One-sentence map summary: progress + agency trend, training-log tone (see [AGENCY.md](./AGENCY.md)).
+4. Run `python3 scripts/ledger_tools.py map` to regenerate `map.html`, then give a one-sentence map summary: progress + agency trend, training-log tone (see [AGENCY.md](./AGENCY.md)).
+5. **Protocol self-audit** — append one line to `NOTES.md`: "Protocol self-audit: steps skipped or bent today — {none | list}." Honest drift is recoverable; silent drift is not.
 
 ## Comeback session (gap ≥ 2× cadence)
 

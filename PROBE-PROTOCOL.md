@@ -47,6 +47,8 @@ Grader instructions (include verbatim in the subagent prompt):
 
 > Grade strictly against the criteria. Your rationale must quote specific evidence from the response. Fluency is not understanding; a confident wrong answer is wrong. When in doubt, grade down — a false positive corrupts the learner's map and harms them. Return: grade (Again/Hard/Good/Easy), rationale with quotes, one observed gap if any.
 
+**Fallback when subagents are unavailable** (platform has no Task/spawn tool): grade in-conversation, but declared and constrained — state "no fresh-context grader available on this platform, so validity is degraded"; write the pre-flight pass criteria *before* seeing the response; grade strictly against them using the same instructions above, quoting evidence; and mark the evidence entry `graded: in-context` in the ledger so a future fresh-context re-probe knows to confirm it. Never silently substitute self-grading for the subagent.
+
 ## Grade mapping
 
 | Outcome | Grade | FSRS | Ledger effect |
