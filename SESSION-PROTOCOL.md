@@ -2,13 +2,21 @@
 
 Every session is one of three shapes: **cold start** (first ever), **standard**, or **comeback** (gap ≥ 2× the agreed cadence). Detect which by reading `MISSION.md`, `NEXT.md`, and the most recent dates in `LEDGER.md`. Get today's date from the system (`date +%F`) — never guess it.
 
-Time budgets below assume a 60-minute session; scale proportionally to the cadence in `MISSION.md`.
+Time budgets below assume a 60-minute session; scale to the session length in `MISSION.md`.
+
+**Short sessions (under ~20 min) don't shrink the lifecycle — they split it.** Running all four phases in 10 minutes turns the protocol into pure overhead. Instead, alternate session types across the week:
+
+- **Review days** (5–10 min): re-entry in one line, then due re-probes only. No new material. This is most days for a 5-minute learner.
+- **Teaching days** (the longest slots available): one micro-lesson (one capability, attempt-first, one practice rep) plus at most one due review folded in.
+- Close shrinks to two lines: learner's one-line takeaway, agent updates `NEXT.md` with which type tomorrow is.
+
+State the split in `NEXT.md` so the learner always knows what kind of session they're walking into. FSRS doesn't care — short frequent retrieval is excellent scheduling; what must never be compressed is attempt-first and honest grading.
 
 ## Cold start (first session)
 
 **Hard rule: the first lesson begins within ~10 minutes of session start.** Onboarding that eats the session kills the learner's reason for coming.
 
-1. **Mission interview** (≤10 min). Why this topic, what does success look like, cadence, constraints. Push concrete over abstract. **Confirm the artifact medium — never infer it.** "You're technical" does not mean they want to learn through code; a domain mission (finance, music theory) is not a coding mission unless the learner says so. Run the scope gate ([MISSION-FORMAT.md](./MISSION-FORMAT.md)) — including the red-flag check for any pain/health/high-stakes adjacency. Write `MISSION.md`.
+1. **Mission interview** (≤10 min). Why this topic, what does success look like, cadence **and session length** (5 minutes a day and 30 minutes a day are different protocols — ask, don't assume), constraints. Push concrete over abstract. **Confirm the artifact medium — never infer it.** "You're technical" does not mean they want to learn through code; a domain mission (finance, music theory) is not a coding mission unless the learner says so. Run the scope gate ([MISSION-FORMAT.md](./MISSION-FORMAT.md)) — including the red-flag check for any pain/health/high-stakes adjacency. Write `MISSION.md`.
 2. **First lesson immediately.** For project missions, ship the thinnest vertical slice that produces a working artifact today ("CLI that echoes a file"). Tangible win first; theory attaches later.
 3. **After the lesson**, draft the capability map (see decomposition rules in [LEDGER-FORMAT.md](./LEDGER-FORMAT.md)) and walk the learner through it for approval. The map is a proposal, not a verdict.
 4. **Schedule the nudge.** If the platform has scheduling tools (e.g. Cowork scheduled tasks), offer to create a recurring task matching the cadence in `MISSION.md` — prompt along the lines of: "Open the {workspace} folder, read NEXT.md and LEDGER.md, and start today's session — lead with what's due." Keep it in sync: update or remove the task whenever cadence is renegotiated. On file-only platforms, say so once: the workspace can't notice the learner has been gone.

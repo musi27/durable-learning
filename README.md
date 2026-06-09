@@ -4,13 +4,11 @@
 
 `/durable-learning` is an agent skill that turns any directory into a persistent, multi-session learning workspace. You tell it what you want to learn and why; it teaches you in tightly-scoped lessons, schedules reviews with a real memory model, and — the part no chatbot tutor does — honestly tracks whether the capability ended up in *you*.
 
-Background & problem framing: [Durable learning with a model in the loop](https://musi.live/writing/durable-learning-with-a-model-in-the-loop)
-
 ## The problem it exists for
 
 When a model sits in the learning loop, the oldest signal in education breaks: **output no longer proves understanding.** A learner can produce any answer by asking the model, move through material producing correct work, and never find out the capability didn't transfer. The bottleneck moves from *what the learner produces* to *what the learner can do without the model* — and almost nothing measures that.
 
-Two things still determine lasting capability:
+Two things still determine lasting capability (background: [Durable learning with a model in the loop](https://musi.live/writing/durable-learning-with-a-model-in-the-loop)):
 
 - **Compounding** — what you already know determines how fast the next thing sticks.
 - **Agency** — the choice, at every gap, between reaching for the model and doing the work yourself. Capability is the residue of effort *you* did; whatever bypasses the effort bypasses the capability.
@@ -23,13 +21,13 @@ Two things still determine lasting capability:
 
 **Teacher and Assessor are separate roles.** The Teacher explains, scaffolds, and adapts to you. The Assessor is a fresh-context grader that sees only your verbatim answer and the rubric — no rapport, no memory of how hard you tried. Teaching is soft; measurement is hard. A skipped probe records as *unknown*, never as a pass.
 
-**Real spaced repetition.** Scheduling runs on [FSRS](https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler) (ML-based spaced repetition algorithm), vendored as a small script. It handles real life: skip three weeks and nothing punishes you — a successful comeback review legitimately earns extra-long intervals. Reviews open every session, capped at 25% so they never swallow it.
+**Real spaced repetition.** Scheduling runs on [FSRS](https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler) (the memory model behind modern Anki), vendored as a small script. It handles real life: skip three weeks and nothing punishes you — a successful comeback review legitimately earns extra-long intervals. Reviews open every session, capped at 25% so they never swallow it.
 
 **Agency telemetry.** The skill always answers when you ask — and logs when you reached for the answer before attempting. Fully visible, framed like an athlete's training log, never like a conscience. Over weeks you watch your independence compound next to your capability. We believe no other learning tool does this.
 
 **Transfer probes the model can't fake.** Probes are generated fresh each time (same deep structure, novel surface), performed live. In agent-assisted domains like coding, only live in-session work counts as evidence — your repo is context, not proof, because the capability in it might be the model's. Each session opens with a *diff teach-back*: explain what you shipped this week; whatever you can't explain becomes the next lesson, free of shame and perfectly mission-relevant.
 
-**Honest scope.** At setup, the skill classifies your topic on two axes: can evidence be *shown* (code runs, swatches photograph), and what does wrong assessment cost? If the wrong assessment can be costly (i.e. teaching physical exercises with no actual way of verifying your ability to perform them correctly), the skill will hand practice coaching to a human teacher and explain its rationale behind this decision. The explanation is the policy: friction without rationale is treated as a bug everywhere in the system ("legible pedagogy").
+**Honest scope.** At setup, the skill classifies your topic on two axes: can evidence be *shown* (code runs, swatches photograph), and what does wrong assessment cost? Yoga form fails both — unverifiable and injury-priced — so the skill teaches the knowledge layer and *explains why* it hands practice coaching to a human teacher, rather than pretending it can see you. The explanation is the policy: friction without rationale is treated as a bug everywhere in the system ("legible pedagogy").
 
 **The learner does the generative work.** You draft the glossary definitions and the one-line evidence summaries; the agent only edits. Compression is where learning happens — the system refuses to do it for you.
 
@@ -75,6 +73,4 @@ Come back to the same folder for every session. The workspace is the memory.
 
 ## Lineage
 
-This is a learning skill built around transfer measurement and agency, with the purpose being to transfer the capability to the learner. Spaced repetition scheduling algorithm used is [FSRS / py-fsrs](https://github.com/open-spaced-repetition/py-fsrs) (MIT). Pedagogy: retrieval practice & spacing (Roediger/Karpicke; Dunlosky et al. 2013), zone of proximal development (Vygotsky), productive failure (Kapur), autonomy-supportive rationale-giving (self-determination theory). 
-
-Problem framing: [Durable learning with a model in the loop](https://musi.live/writing/durable-learning-with-a-model-in-the-loop).
+This is a learning skill built around transfer measurement and agency, with the purpose being to transfer the capability to the learner. Spaced repetition scheduling algorithm used is [FSRS / py-fsrs](https://github.com/open-spaced-repetition/py-fsrs) (MIT). Structure descended from [Matt Pocock's `/teach`](https://github.com/mattpocock/skills) (mission files, glossary, learning records, community delegation). Pedagogy: retrieval practice & spacing (Roediger/Karpicke; Dunlosky et al. 2013), zone of proximal development (Vygotsky), productive failure (Kapur), autonomy-supportive rationale-giving (self-determination theory). Problem framing: [Durable learning with a model in the loop](https://musi.live/writing/durable-learning-with-a-model-in-the-loop).

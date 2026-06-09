@@ -15,7 +15,8 @@
 - {…}
 
 ## Cadence
-- Sessions: {e.g., Saturdays ~90 min}
+- Sessions: {e.g., daily / Saturdays}
+- Session length: {e.g., 5 min / 30 min / 90 min — ask explicitly; it changes the session shape, see SESSION-PROTOCOL.md}
 - Midweek homework: {yes/no; dose — renegotiated after any dropout}
 
 ## Constraints
