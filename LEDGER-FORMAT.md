@@ -1,0 +1,73 @@
+# LEDGER.md Format
+
+`LEDGER.md` is the source of truth for what the learner can do, how confidently we know it, and what to teach next. It replaces both "learning records" and any invisible model of the learner. If it isn't in the ledger, the system doesn't know it.
+
+## Capability levels
+
+| Level | Name | Meaning | Minimum evidence |
+|---|---|---|---|
+| L0 | Introduced | Material was covered. Coverage is not learning. | none |
+| L1 | Retrieved | Recalled the core idea from memory, ≥1 day after introduction | recall probe |
+| L2 | Applied | Solved a practice-like task unaided (near transfer) | application probe, live |
+| L3 | Transferred | Solved a novel-surface task unaided, ≥72h since last contact with the node | far-transfer probe |
+| L4 | Generative | Taught it back surviving an adversarial follow-up, or combined ≥2 nodes (≥1 at L3) in one artifact | teach-back or combination artifact |
+
+`level` is the highest level ever evidenced. Whether it is *currently trusted* is a separate question answered by FSRS (below).
+
+## Node entry format
+
+```md
+### N07 · error-handling-with-result
+- slice: S2 (parse one log line)
+- prereqs: N03, N04
+- level: L2 · achieved 2026-06-06
+- fsrs: S=8.42 D=6.10 last=2026-06-06 due=2026-06-14
+- flags: —
+- evidence:
+  - 2026-06-06 · L2 · probe 0007 (Good) — wrote the parser unaided; compiled first try
+  - 2026-05-30 · L1 · recall in session (Good)
+- reaches: 1 · (2026-05-30, asked for solution before attempting, lesson 0004)
+```
+
+Flags: `knowledge-only` (scope gate — node about a domain whose practice we don't coach), `prior-knowledge` (claimed already-known; level set only after a calibration probe, see PROBE-PROTOCOL.md), `mis-carve?` (repeated probe failures suggest the node is wrongly decomposed — review the cut before re-teaching).
+
+The one-line evidence summary is **drafted by the learner**, edited by you.
+
+## Scheduling (FSRS)
+
+Each node carries `S` (stability), `D` (difficulty), `last` (last evidence date), `due`. All math via `scripts/fsrs.py`:
+
+- First evidence event: `python3 scripts/fsrs.py new --grade G --date YYYY-MM-DD`
+- Subsequent: `python3 scripts/fsrs.py review --stability S --difficulty D --last YYYY-MM-DD --grade G --date YYYY-MM-DD`
+- Checking what's due / current retrievability: `python3 scripts/fsrs.py status --stability S --last YYYY-MM-DD`
+
+Grades come from probe outcomes (mapping in [PROBE-PROTOCOL.md](./PROBE-PROTOCOL.md)). FSRS handles early, late, and same-day reviews natively — a successful re-probe after a long gap legitimately earns a long next interval. Trust it.
+
+**A due node cannot satisfy a prerequisite.** It must be re-verified (re-probe at its achieved level) first. This is what makes decay bite without ever deleting history.
+
+## The frontier (what to teach next)
+
+A node is **frontier-eligible** when: its level is L0 or L1, every prerequisite is ≥L2 and not due, and it is not flagged `knowledge-only`-blocked or void. Rank eligible nodes by mission-relevance; ties break toward the node unblocking the most descendants. The learner can always override — record the override.
+
+## Decomposition rules
+
+- **Project missions decompose by vertical slice, not by topic.** Slices (`S1 CLI echoes a file`, `S2 parse one log line`, …) each end in a working artifact; concept nodes attach to the slice that first needs them. Ownership gets taught when the borrow checker first complains — that is when it is learnable. A textbook-chapter map that delays the first working artifact past session 1 is mis-carved.
+- Knowledge missions decompose by concept, but every node still names what the learner will be able to *do* (explain, predict, distinguish), not what will be "covered."
+- The map is proposed by you and **approved by the learner** at cold start. It is revisable: repeated probe failures on one node trigger the `mis-carve?` check before any re-teaching.
+- Keep it small. 8–15 nodes initially; grow as slices complete. A 60-node map at session 1 is a syllabus, not a frontier.
+
+## Agency log
+
+Bottom of the ledger:
+
+```md
+## Agency Log
+- 2026-06-06 · N07 · attempted twice before asking — asked for review of approach (not a reach)
+- 2026-05-30 · N04 · reach: asked for the solution before attempting (lesson 0004)
+```
+
+Definition of a reach-event and all framing rules: [AGENCY.md](./AGENCY.md). Per-node counts are mirrored in the node's `reaches` line.
+
+## Map view
+
+At session close, optionally regenerate `map.html` — a single self-contained HTML view of the ledger: slices as columns, nodes colored by state (unstarted / frontier / verified / due), agency trend in a corner. Same training-log tone as everything else.
