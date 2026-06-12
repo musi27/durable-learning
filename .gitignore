@@ -1,3 +1,4 @@
 .DS_Store
 .obsidian/
 ROADMAP.md
+__pycache__/
