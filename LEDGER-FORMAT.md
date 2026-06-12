@@ -2,16 +2,46 @@
 
 `LEDGER.md` is the source of truth for what the learner can do, how confidently we know it, and what to teach next. It replaces both "learning records" and any invisible model of the learner. If it isn't in the ledger, the system doesn't know it.
 
+## The learning root
+
+Workspaces do not stand alone. The canonical layout is a **learning root**: one parent folder holding `registry.md`, the aggregate `map.html`, and one workspace subfolder per mission:
+
+```
+learning/
+  registry.md          list of workspaces (format below)
+  map.html             aggregate map — `ledger_tools.py map --all`
+  finance/
+    LEDGER.md, MISSION.md, lessons/, …
+  rust-cli/
+    LEDGER.md, …
+```
+
+`registry.md` format:
+
+```md
+# Learning Registry
+protocol: 2
+
+### finance
+- path: finance
+- cadence: daily · 30 min
+
+### rust-cli
+- cadence: 3x/week · 60 min
+```
+
+Each `###` header names a workspace. The name must be a lowercase slug (`a-z`, `0-9`, `-`, `_`) because it doubles as the prefix in cross-workspace prerequisites (`finance:N01`). Fields per workspace: `path` — folder relative to the root, defaults to the name; `cadence` — display only (the binding cadence lives in that workspace's `MISSION.md`). Cold start creates the root structure when it is missing ([SESSION-PROTOCOL.md](./SESSION-PROTOCOL.md)); the tools find the root by looking for `registry.md` in the workspace's parent folder.
+
 ## File header
 
 The ledger begins with:
 
 ```md
 # Capability Ledger
-protocol: 1
+protocol: 2
 ```
 
-The `protocol:` line ties the workspace to the ledger syntax version this skill expects. The linter warns when it is missing, flags older versions (migration may be needed), and refuses newer ones — a newer number means the workspace was created by a newer skill, so update the skill rather than hand-editing the ledger.
+The `protocol:` line ties the workspace to the ledger syntax version this skill expects. The linter warns when it is missing and **rejects any other version**: older ones have no migration path (v1 predates the learning root — rebuild the workspace under a root), and a newer number means the workspace was created by a newer skill, so update the skill rather than hand-editing the ledger.
 
 ## Capability levels
 
@@ -42,6 +72,10 @@ The `protocol:` line ties the workspace to the ledger syntax version this skill 
 
 Flags: `knowledge-only` (scope gate — node about a domain whose practice we don't coach), `prior-knowledge` (claimed already-known; level set only after a calibration probe, see PROBE-PROTOCOL.md), `mis-carve?` (repeated probe failures suggest the node is wrongly decomposed — review the cut before re-teaching).
 
+### Cross-workspace prerequisites
+
+A prerequisite may live in a sibling workspace: `prereqs: N03, finance:N01`. The prefix is the workspace's registry name; the linter resolves the reference by reading the sibling's ledger through `registry.md` and errors on an unknown workspace, a missing node, a malformed prefix, or a workspace that isn't under a learning root. This is how knowledge compounds across missions — a derivatives workspace leans on `finance:N01` instead of re-teaching double-entry.
+
 The one-line evidence summary is **drafted by the learner**, edited by you.
 
 ## Scheduling (FSRS)
@@ -54,7 +88,7 @@ Each node carries `S` (stability), `D` (difficulty), `last` (last evidence date)
 
 Grades come from probe outcomes (mapping in [PROBE-PROTOCOL.md](./PROBE-PROTOCOL.md)). FSRS handles early, late, and same-day reviews natively — a successful re-probe after a long gap legitimately earns a long next interval. Trust it.
 
-**A due node cannot satisfy a prerequisite.** It must be re-verified (re-probe at its achieved level) first. This is what makes decay bite without ever deleting history.
+**A due node cannot satisfy a prerequisite — in any workspace.** It must be re-verified (re-probe at its achieved level) first. This is what makes decay bite without ever deleting history, and the rule crosses workspace boundaries: a due `finance:N01` blocks the derivatives node that depends on it.
 
 ## The frontier (what to teach next)
 
@@ -81,8 +115,11 @@ Definition of a reach-event and all framing rules: [AGENCY.md](./AGENCY.md). Per
 
 ## Machine checking
 
-The ledger format above is machine-checked. `python3 scripts/ledger_tools.py check` validates node ids, prereq references (existence and cycles), level fields, fsrs lines, and dates — run it at every session open and fix errors before anything else. Keep the field syntax exactly as shown in the node entry template; the linter and the map renderer both parse it.
+The formats above are machine-checked — keep the field syntax exactly as shown; the linter, the queue, and the map renderer all parse it.
+
+- `python3 scripts/ledger_tools.py check` validates one workspace: protocol version, node ids, prereq references (existence and cycles — cross-workspace references resolved through the registry, with the cycle check spanning sibling ledgers), level fields, fsrs lines, and dates. Run it at every session open and fix errors before anything else.
+- `python3 scripts/ledger_tools.py today` walks the registry and emits the **unified due queue**: every due node across every registered workspace in one list, triaged by prerequisite-centrality (how many nodes anywhere depend on it) then days overdue. Mission-relevance is your overlay on that ordering.
 
 ## Map view
 
-At session close, run `python3 scripts/ledger_tools.py map` to regenerate `map.html` — a single self-contained HTML view of the ledger: slices as columns, nodes colored by state (unstarted / frontier / verified / due / knowledge-only), current retrievability per node, agency trend at the bottom. Same training-log tone as everything else. This is the learner's progress view; it is not optional.
+At session close, run `python3 scripts/ledger_tools.py map` to regenerate the workspace's `map.html` — a single self-contained HTML view of the ledger: slices as columns, nodes colored by state (unstarted / frontier / verified / due / knowledge-only), current retrievability per node, agency trend at the bottom — and `python3 scripts/ledger_tools.py map --all` to regenerate the aggregate map at the root: every workspace's slices, the unified due queue, and the combined agency trend. Same training-log tone as everything else. This is the learner's progress view; it is not optional.
