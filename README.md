@@ -23,6 +23,8 @@ Two things still determine lasting capability (background: [Durable learning wit
 
 **Real spaced repetition.** Scheduling runs on [FSRS](https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler) (the memory model behind modern Anki), vendored as a small script. It handles real life: skip three weeks and nothing punishes you — a successful comeback review legitimately earns extra-long intervals. Reviews open every session, capped at 25% so they never swallow it.
 
+**One memory across every mission.** All your topics live under one learning root and share a single daily review queue — one habit, not one per topic, which is the difference between retention and silent churn. Capabilities verified in one mission serve as prerequisites in another (`finance:N01`), so a new topic builds on what the ledger already trusts instead of re-teaching it. One aggregate map shows everything you're learning.
+
 **Agency telemetry.** The skill always answers when you ask — and logs when you reached for the answer before attempting. Fully visible, framed like an athlete's training log, never like a conscience. Over weeks you watch your independence compound next to your capability. We believe no other learning tool does this.
 
 **Transfer probes the model can't fake.** Probes are generated fresh each time (same deep structure, novel surface), performed live. In agent-assisted domains like coding, only live in-session work counts as evidence — your repo is context, not proof, because the capability in it might be the model's. Each session opens with a *diff teach-back*: explain what you shipped this week; whatever you can't explain becomes the next lesson, free of shame and perfectly mission-relevant.
