@@ -38,7 +38,7 @@
 
 ## Rules
 
-- **One mission per workspace.** Two unrelated goals = two workspaces.
+- **One mission per workspace.** Two unrelated goals = two workspaces under the same learning root: shared review queue, separate maps.
 - **Concrete over abstract.** Push for the outcome behind "understand X."
 - **Project missions decompose by vertical slice** (see LEDGER-FORMAT.md): first session ends with a working artifact, concepts attach to the slice that first needs them.
 - **Revise on contact with reality.** Missions legitimately shift as capability grows. Confirm with the learner, update the file, note the shift in `NOTES.md`. Comeback sessions explicitly renegotiate cadence and homework dose.

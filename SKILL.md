@@ -1,6 +1,6 @@
 ---
 name: durable-learning
-description: Learn a skill or concept durably, within this workspace. Tracks whether capability actually transferred to the learner — not whether answers got produced.
+description: Learn a skill or concept durably, within this folder's learning root (one workspace per mission, one shared review queue). Tracks whether capability actually transferred to the learner — not whether answers got produced.
 disable-model-invocation: true
 argument-hint: "What do you want to learn, and why?"
 ---
@@ -23,9 +23,11 @@ Every rule below serves one of those two.
 
 Teaching adapts to the learner (strictness, pacing, scaffolding — set in MISSION.md). **Assessment never adapts.** A skipped probe records as *unknown*, never as passed. Soft teaching, hard measurement.
 
-## The teaching workspace
+## The learning root and its workspaces
 
-Treat the current directory as the workspace. Create files lazily — only when first needed.
+Treat the current directory as the **learning root**: it holds `registry.md` (the list of mission workspaces — format in [LEDGER-FORMAT.md](./LEDGER-FORMAT.md)), the aggregate `map.html`, and one workspace subfolder per mission. If there is no `registry.md`, cold start creates the root structure ([SESSION-PROTOCOL.md](./SESSION-PROTOCOL.md)); if you were launched inside a workspace folder, the root is its parent — the scripts auto-discover it. The shared root is what makes knowledge compound across missions: one daily due queue (`ledger_tools.py today`) and cross-workspace prerequisites (`finance:N01`) instead of one isolated habit per topic.
+
+Within a workspace, create files lazily — only when first needed.
 
 - `MISSION.md` — why the learner is here, success criteria, cadence, strictness, scope-gate result. Format: [MISSION-FORMAT.md](./MISSION-FORMAT.md). Grounds every decision.
 - `LEDGER.md` — the capability map: nodes, levels L0–L4, FSRS scheduling state, evidence, agency log. Format: [LEDGER-FORMAT.md](./LEDGER-FORMAT.md). This is the source of truth for what to teach next.
@@ -61,4 +63,4 @@ Never trust your parametric knowledge for teaching content. Before `RESOURCES.md
 
 **Read [AGENT-BRIEF.md](./AGENT-BRIEF.md) in full at the start of every session** — it is the one-page invariants card; the other docs are reference. Every session follows [SESSION-PROTOCOL.md](./SESSION-PROTOCOL.md): re-entry → review block → teaching block → close, with cold-start and comeback variants.
 
-Tooling, non-negotiable: scheduling math through `scripts/fsrs.py` (never hand-computed); `scripts/ledger_tools.py check` at session open (the ledger is load-bearing — drift must be caught, not discovered); `scripts/ledger_tools.py map` at close so the learner always has a current map.html. Sessions end with a one-line protocol self-audit in `NOTES.md` (see AGENT-BRIEF.md §16).
+Tooling, non-negotiable: scheduling math through `scripts/fsrs.py` (never hand-computed); `scripts/ledger_tools.py check` at session open (the ledger is load-bearing — drift must be caught, not discovered) plus `scripts/ledger_tools.py today` for the unified due queue across the root; `scripts/ledger_tools.py map` and `map --all` at close so the learner always has current maps. Sessions end with a one-line protocol self-audit in `NOTES.md` (see AGENT-BRIEF.md §17).

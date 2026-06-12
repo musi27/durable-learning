@@ -2,7 +2,7 @@
 
 **A tutor that measures what actually transferred to you — not what got produced.**
 
-`/durable-learning` is an agent skill that turns any directory into a persistent, multi-session learning workspace. You tell it what you want to learn and why; it teaches you in tightly-scoped lessons, schedules reviews with a real memory model, and — the part no chatbot tutor does — honestly tracks whether the capability ended up in *you*.
+`/durable-learning` is an agent skill that turns any directory into a persistent, multi-session **learning root** — one folder holding every mission you're learning, with one shared review queue across them all. You tell it what you want to learn and why; it teaches you in tightly-scoped lessons, schedules reviews with a real memory model, and — the part no chatbot tutor does — honestly tracks whether the capability ended up in *you*.
 
 ## The problem it exists for
 
@@ -55,25 +55,26 @@ durable-learning/
   AGENCY.md               attempt-first contract, reach-events, framing rules
   MISSION-FORMAT.md       mission template + the scope gate
   scripts/fsrs.py         vendored FSRS-6 scheduler (stdlib only)
-  scripts/ledger_tools.py ledger linter (`check`) + progress map renderer (`map`)
+  scripts/ledger_tools.py ledger linter (`check`), unified due queue (`today`), map renderer (`map`, `map --all`)
+  tests/                  test suite against a sample two-workspace learning root
 ```
 
-Your learning workspace (created lazily, per topic): `MISSION.md`, `LEDGER.md`, `GLOSSARY.md`, `RESOURCES.md`, `NOTES.md`, `NEXT.md`, `map.html`, plus `lessons/`, `reference/`, and `probes/`. All plain files — inspectable, editable, yours to version-control.
+Your learning root (created at the first session): `registry.md` listing each mission workspace, an aggregate `map.html`, and one subfolder per mission holding `MISSION.md`, `LEDGER.md`, `GLOSSARY.md`, `RESOURCES.md`, `NOTES.md`, `NEXT.md`, `map.html`, plus `lessons/`, `reference/`, and `probes/` (created lazily). All plain files — inspectable, editable, yours to version-control. Capabilities verified in one mission can serve as prerequisites in another (`prereqs: finance:N01`) — knowledge compounds across topics instead of being re-taught.
 
 Three reliability mechanisms keep long-running workspaces honest: the agent re-reads the one-page brief every session (long protocols drift; a card doesn't), the ledger is machine-linted at session open (everything downstream trusts it), and every session closes with a one-line protocol self-audit in `NOTES.md` — silent drift is the failure mode, so the protocol makes drift speak.
 
 ## Install & run
 
-Copy the `durable-learning/` directory into your agent's skills location (e.g. `~/.claude/skills/durable-learning`). Then, one folder per topic:
+Copy the `durable-learning/` directory into your agent's skills location (e.g. `~/.claude/skills/durable-learning`). Then make one learning root and start your first mission:
 
 ```bash
-mkdir learn-rust && cd learn-rust
+mkdir learning && cd learning
 /durable-learning how to build a CLI in Rust
 ```
 
-Come back to the same folder for every session. The workspace is the memory.
+Come back to the same folder for every session — and start your next topic there too, not in a new folder: every mission under the root shares one daily review queue, so it stays one habit instead of three. The folder is the memory.
 
-**Platform notes.** The core is portable: plain files plus Python stdlib. On platforms with scheduling (e.g. Cowork), the skill offers at setup to create a recurring nudge matching your cadence — a scheduled task that opens the workspace, reads what's due, and starts the session — and keeps it in sync when your cadence changes. On file-only platforms there is no nudge: a file can't notice you've been gone.
+**Platform notes.** The core is portable: plain files plus Python stdlib. On platforms with scheduling (e.g. Cowork), the skill offers at setup to create a recurring nudge matching your cadence — a scheduled task that opens the root, reads what's due across every mission, and starts the session — and keeps it in sync when your cadence changes. One nudge per root, even with several missions. On file-only platforms there is no nudge: a file can't notice you've been gone.
 
 ## Lineage
 
