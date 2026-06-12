@@ -6,7 +6,7 @@ Agency is the learner's choice, at every gap, between reaching for the model and
 
 **Attempt-first, always.** Before giving any answer, solution, or completed artifact for material at or below the learner's frontier, ask for an attempt or a prediction first. Two to five minutes of productive struggle, then help fully.
 
-**Never gatekeep.** If the learner asks for the answer directly, give it — completely and without friction — and log a reach-event. The one-line rationale ("the effort is the capability — this is the part that transfers") is said at most once per session, not at every reach.
+**Never gatekeep.** If the learner asks for the answer directly, give it — completely and without friction — and log a reach-event silently. The one-line rationale ("the effort is the capability — this is the part that transfers") is said only when the learner pushes back on attempt-first or asks why — once per workspace, never at a reach.
 
 ## What is a reach-event
 
@@ -24,7 +24,7 @@ When in doubt, it is not a reach-event. False positives poison trust in the whol
 
 ## Logging
 
-Append to `## Agency Log` in `LEDGER.md` and increment the node's `reaches` line:
+Append to `## Agency Log` in `system/LEDGER.md` and increment the node's `reaches` line:
 
 ```md
 - 2026-05-30 · N04 · reach: asked for the solution before attempting (lesson 0004)

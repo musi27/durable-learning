@@ -1,8 +1,10 @@
-"""Tests for ledger_tools.py v2 — learning root, cross-workspace prereqs,
-unified due queue, aggregate map.
+"""Tests for ledger_tools.py v3 — learning root, system/ split,
+cross-workspace prereqs, unified due queue, aggregate map.
 
 Fixture: a two-workspace learning root (finance, rust-cli) where rust-cli
-declares a cross-workspace prereq on finance:N01. All date-sensitive
+declares a cross-workspace prereq on finance:N01. Protocol v3 layout:
+each workspace keeps the learner's surface at its root and the agent's
+state in system/ (root/<ws>/system/LEDGER.md). All date-sensitive
 commands take --date so the fixture is deterministic.
 
 Run: python3 -m unittest discover -s tests
@@ -25,7 +27,7 @@ TODAY = "2026-06-12"
 
 REGISTRY = """\
 # Learning Registry
-protocol: 2
+protocol: 3
 
 ### finance
 - path: finance
@@ -37,7 +39,7 @@ protocol: 2
 
 FINANCE_LEDGER = """\
 # Capability Ledger
-protocol: 2
+protocol: 3
 
 ## Nodes
 
@@ -65,7 +67,7 @@ protocol: 2
 
 RUST_LEDGER = """\
 # Capability Ledger
-protocol: 2
+protocol: 3
 
 ## Nodes
 
@@ -100,8 +102,8 @@ class RootFixture(unittest.TestCase):
         self._tmp = tempfile.TemporaryDirectory()
         self.root = Path(self._tmp.name)
         self.write("registry.md", REGISTRY)
-        self.write("finance/LEDGER.md", FINANCE_LEDGER)
-        self.write("rust-cli/LEDGER.md", RUST_LEDGER)
+        self.write("finance/system/LEDGER.md", FINANCE_LEDGER)
+        self.write("rust-cli/system/LEDGER.md", RUST_LEDGER)
 
     def tearDown(self):
         self._tmp.cleanup()
@@ -112,9 +114,11 @@ class RootFixture(unittest.TestCase):
         path.write_text(content, encoding="utf-8")
         return path
 
+    def ledger(self, workspace):
+        return self.root / workspace / "system" / "LEDGER.md"
+
     def check(self, workspace, **kw):
-        return run_tool("check", "--ledger",
-                        str(self.root / workspace / "LEDGER.md"),
+        return run_tool("check", "--ledger", str(self.ledger(workspace)),
                         "--date", TODAY, **kw)
 
 
@@ -126,61 +130,75 @@ class TestCheck(RootFixture):
         # due detection is date-deterministic: finance N01 is 4d overdue
         self.assertIn("N01", self.check("finance").stdout)
 
+    def test_rejects_protocol_v2(self):
+        self.write("finance/system/LEDGER.md",
+                   FINANCE_LEDGER.replace("protocol: 3", "protocol: 2"))
+        r = self.check("finance")
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("unsupported", r.stdout.lower())
+
     def test_rejects_protocol_v1(self):
-        self.write("finance/LEDGER.md",
-                   FINANCE_LEDGER.replace("protocol: 2", "protocol: 1"))
+        self.write("finance/system/LEDGER.md",
+                   FINANCE_LEDGER.replace("protocol: 3", "protocol: 1"))
         r = self.check("finance")
         self.assertEqual(r.returncode, 1)
         self.assertIn("unsupported", r.stdout.lower())
 
     def test_rejects_newer_protocol(self):
-        self.write("finance/LEDGER.md",
-                   FINANCE_LEDGER.replace("protocol: 2", "protocol: 3"))
+        self.write("finance/system/LEDGER.md",
+                   FINANCE_LEDGER.replace("protocol: 3", "protocol: 4"))
         r = self.check("finance")
         self.assertEqual(r.returncode, 1)
         self.assertIn("newer", r.stdout.lower())
 
     def test_missing_protocol_warns(self):
-        self.write("finance/LEDGER.md",
-                   FINANCE_LEDGER.replace("protocol: 2\n", ""))
+        self.write("finance/system/LEDGER.md",
+                   FINANCE_LEDGER.replace("protocol: 3\n", ""))
         r = self.check("finance")
         self.assertEqual(r.returncode, 0)
         self.assertIn("protocol", r.stdout.lower())
         self.assertIn("warning", r.stdout.lower())
 
+    def test_rejects_old_registry_protocol(self):
+        self.write("registry.md", REGISTRY.replace("protocol: 3", "protocol: 2"))
+        r = self.check("finance")
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("registry", r.stdout.lower())
+        self.assertIn("unsupported", r.stdout.lower())
+
     def test_unknown_workspace_prefix_is_error(self):
-        self.write("rust-cli/LEDGER.md",
+        self.write("rust-cli/system/LEDGER.md",
                    RUST_LEDGER.replace("finance:N01", "nope:N01"))
         r = self.check("rust-cli")
         self.assertEqual(r.returncode, 1)
         self.assertIn("nope", r.stdout)
 
     def test_missing_node_in_sibling_is_error(self):
-        self.write("rust-cli/LEDGER.md",
+        self.write("rust-cli/system/LEDGER.md",
                    RUST_LEDGER.replace("finance:N01", "finance:N99"))
         r = self.check("rust-cli")
         self.assertEqual(r.returncode, 1)
         self.assertIn("N99", r.stdout)
 
     def test_malformed_qualified_prereq_is_error(self):
-        self.write("rust-cli/LEDGER.md",
+        self.write("rust-cli/system/LEDGER.md",
                    RUST_LEDGER.replace("finance:N01", "Finance:N01"))
         r = self.check("rust-cli")
         self.assertEqual(r.returncode, 1)
         self.assertIn("malformed", r.stdout.lower())
 
     def test_cross_prereq_without_registry_is_error(self):
-        # standalone workspace: no registry.md in the parent directory
+        # standalone workspace: no registry.md in the workspace's parent
         with tempfile.TemporaryDirectory() as solo:
-            ledger = Path(solo) / "rust-cli" / "LEDGER.md"
-            ledger.parent.mkdir()
+            ledger = Path(solo) / "rust-cli" / "system" / "LEDGER.md"
+            ledger.parent.mkdir(parents=True)
             ledger.write_text(RUST_LEDGER, encoding="utf-8")
             r = run_tool("check", "--ledger", str(ledger), "--date", TODAY)
             self.assertEqual(r.returncode, 1)
             self.assertIn("registry", r.stdout.lower())
 
     def test_cross_workspace_cycle_detected(self):
-        self.write("finance/LEDGER.md",
+        self.write("finance/system/LEDGER.md",
                    FINANCE_LEDGER.replace("- prereqs: —\n",
                                           "- prereqs: rust-cli:N02\n", 1))
         r = self.check("finance")
@@ -188,8 +206,8 @@ class TestCheck(RootFixture):
         self.assertIn("cycle", r.stdout.lower())
 
     def test_unregistered_workspace_warns(self):
-        self.write("orphan/LEDGER.md",
-                   "# Capability Ledger\nprotocol: 2\n\n"
+        self.write("orphan/system/LEDGER.md",
+                   "# Capability Ledger\nprotocol: 3\n\n"
                    "### N01 · something\n- level: L0\n")
         r = self.check("orphan")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
@@ -226,8 +244,13 @@ class TestToday(RootFixture):
             r = run_tool("today", "--date", TODAY, cwd=solo)
             self.assertEqual(r.returncode, 1)
 
+    def test_old_registry_protocol_is_error(self):
+        self.write("registry.md", REGISTRY.replace("protocol: 3", "protocol: 2"))
+        r = run_tool("today", "--root", str(self.root), "--date", TODAY)
+        self.assertEqual(r.returncode, 1)
+
     def test_broken_sibling_ledger_is_error(self):
-        (self.root / "rust-cli" / "LEDGER.md").unlink()
+        self.ledger("rust-cli").unlink()
         r = run_tool("today", "--root", str(self.root), "--date", TODAY)
         self.assertEqual(r.returncode, 1)
         self.assertIn("rust-cli", r.stdout + r.stderr)
@@ -249,9 +272,18 @@ class TestMap(RootFixture):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertTrue((self.root / "map.html").exists())
 
-    def test_single_workspace_map_still_works(self):
+    def test_single_map_defaults_to_workspace_root(self):
+        # learner's surface: map.html lands next to MISSION.md, not in system/
+        r = run_tool("map", "--ledger", str(self.ledger("finance")),
+                     "--date", TODAY)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         out = self.root / "finance" / "map.html"
-        r = run_tool("map", "--ledger", str(self.root / "finance/LEDGER.md"),
+        self.assertTrue(out.exists())
+        self.assertIn("double-entry", out.read_text(encoding="utf-8"))
+
+    def test_single_map_explicit_out(self):
+        out = self.root / "elsewhere.html"
+        r = run_tool("map", "--ledger", str(self.ledger("finance")),
                      "--out", str(out), "--date", TODAY)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("double-entry", out.read_text(encoding="utf-8"))
@@ -291,6 +323,8 @@ class TestRegistryParsing(RootFixture):
         # finance declares path explicitly; rust-cli falls back to its name
         self.assertEqual(Path(ws["finance"]["dir"]), self.root / "finance")
         self.assertEqual(Path(ws["rust-cli"]["dir"]), self.root / "rust-cli")
+        self.assertEqual(Path(ws["finance"]["ledger"]),
+                         self.root / "finance" / "system" / "LEDGER.md")
         self.assertEqual(ws["finance"]["fields"]["cadence"], "daily · 30 min")
 
     def test_duplicate_workspace_is_error(self):
