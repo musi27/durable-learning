@@ -29,7 +29,7 @@ Two things still determine lasting capability (background: [Durable learning wit
 
 **Transfer probes the model can't fake.** Probes are generated fresh each time (same deep structure, novel surface), performed live. In agent-assisted domains like coding, only live in-session work counts as evidence — your repo is context, not proof, because the capability in it might be the model's. Each session opens with a *diff teach-back*: explain what you shipped this week; whatever you can't explain becomes the next lesson, free of shame and perfectly mission-relevant.
 
-**Honest scope.** At setup, the skill classifies your topic on two axes: can evidence be *shown* (code runs, swatches photograph), and what does wrong assessment cost? Yoga form fails both — unverifiable and injury-priced — so the skill teaches the knowledge layer and *explains why* it hands practice coaching to a human teacher, rather than pretending it can see you. The explanation is the policy: friction without rationale is treated as a bug everywhere in the system ("legible pedagogy").
+**Honest scope.** At setup, the skill classifies your topic on two axes: can evidence be *shown* (code runs, swatches photograph), and what does wrong assessment cost? Yoga form fails both — unverifiable and injury-priced — so the skill teaches the knowledge layer and *explains why* it hands practice coaching to a human teacher, rather than pretending it can see you. The explanation is the policy: every rule in the system can say why it exists — but it answers when you push, it doesn't lecture ("legible pedagogy: machinery felt, not seen").
 
 **The learner does the generative work.** You draft the glossary definitions and the one-line evidence summaries; the agent only edits. Compression is where learning happens — the system refuses to do it for you.
 
@@ -43,7 +43,7 @@ Two things still determine lasting capability (background: [Durable learning wit
 
 ## What it deliberately won't do
 
-Coach physical form or anything it can't observe where errors cost health or money. Count agent-assisted homework as evidence of your skill. Let a skipped probe pass silently. Lecture you about using AI — it logs, you decide. Compute scheduling "intuitively" — math goes through the script. Make you fight tooling: exercises check themselves inside the lesson page unless operating the tooling is the skill you're learning.
+Coach physical form or anything it can't observe where errors cost health or money. Count agent-assisted homework as evidence of your skill. Let a skipped probe pass silently. Lecture you about using AI — it logs, you decide. Narrate its own pedagogy at you — the machinery runs silently, and one short page explains the system if you're curious. Stop you from learning more today than the plan said — only the assessment timing rules hold. Compute scheduling "intuitively" — math goes through the script. Make you fight tooling: exercises check themselves inside the lesson page unless operating the tooling is the skill you're learning.
 
 ## Files
 
@@ -61,9 +61,9 @@ durable-learning/
   tests/                  test suite against a sample two-workspace learning root
 ```
 
-Your learning root (created at the first session): `registry.md` listing each mission workspace, an aggregate `map.html`, and one subfolder per mission holding `MISSION.md`, `LEDGER.md`, `GLOSSARY.md`, `RESOURCES.md`, `NOTES.md`, `NEXT.md`, `map.html`, plus `lessons/`, `reference/`, and `probes/` (created lazily). All plain files — inspectable, editable, yours to version-control. Capabilities verified in one mission can serve as prerequisites in another (`prereqs: finance:N01`) — knowledge compounds across topics instead of being re-taught.
+Your learning root (created at the first session): `registry.md` listing each mission workspace, an aggregate `map.html`, and one subfolder per mission. Each workspace keeps **your files** at the top — `MISSION.md`, `GLOSSARY.md`, `map.html`, `lessons/`, `reference/` — and the tutor's state in `system/` (`LEDGER.md`, `RESOURCES.md`, `NOTES.md`, `NEXT.md`, `probes/`): inspectable, but you never need to open it. All plain files — editable, yours to version-control. Capabilities verified in one mission can serve as prerequisites in another (`prereqs: finance:N01`) — knowledge compounds across topics instead of being re-taught.
 
-Three reliability mechanisms keep long-running workspaces honest: the agent re-reads the one-page brief every session (long protocols drift; a card doesn't), the ledger is machine-linted at session open (everything downstream trusts it), and every session closes with a one-line protocol self-audit in `NOTES.md` — silent drift is the failure mode, so the protocol makes drift speak.
+Three reliability mechanisms keep long-running workspaces honest: the agent re-reads the one-page brief every session (long protocols drift; a card doesn't), the ledger is machine-linted at session open (everything downstream trusts it), and every session closes with a one-line protocol self-audit in `system/NOTES.md` — silent drift is the failure mode, so the protocol makes drift speak.
 
 ## Install & run
 

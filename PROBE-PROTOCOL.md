@@ -7,7 +7,7 @@ Probes are how capability levels are earned. Everything else in the system adapt
 1. **Assessor mode is declared.** Announce the switch: "Assessor mode — I won't help until we're done; I'll record your answer as given." Exit is also declared.
 2. **Probes are generated fresh every time.** Same deep structure, novel surface features. Nothing to leak, nothing to memorize. Old probe transcripts are study material, not future probes.
 3. **No help during a probe.** Clarifying the *task statement* is allowed; hints are not. If the learner asks for help mid-probe, the probe ends as a skip.
-4. **A skipped probe records as unknown** — node goes/stays due. Never silently passed, never punished beyond honesty. Rationale (said once): "the map only works if it's honest — it decides what you never get taught."
+4. **A skipped probe records as unknown** — node goes/stays due. Never silently passed, never punished beyond honesty. Record it without comment; if the learner objects, the one-line answer (once per workspace): "the map only works if it's honest — it decides what you never get taught."
 5. **Timing caps:** material introduced today caps at L2 today. L3 requires ≥72h since the node was last touched (taught, reviewed, or used) — time-based, not session-based. Back-to-back weekend sessions do not unlock L3.
 
 ## Probe types
@@ -62,7 +62,7 @@ Run `scripts/fsrs.py` immediately and update the node's `fsrs:` line.
 
 ## Transcript file
 
-Every probe (including voids and skips) is saved to `probes/NNNN-<node>.md`: pre-flight block, probe as posed, learner response verbatim, grade + rationale (quoted evidence), FSRS update applied. The learner can read everything — transparency is a feature; fresh generation is what protects validity.
+Every probe (including voids and skips) is saved to `system/probes/NNNN-<node>.md`: pre-flight block, probe as posed, learner response verbatim, grade + rationale (quoted evidence), FSRS update applied. The learner can read everything — transparency is a feature; fresh generation is what protects validity.
 
 ## The other-tab problem
 

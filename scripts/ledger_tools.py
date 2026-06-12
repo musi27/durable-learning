@@ -7,15 +7,17 @@ Everything downstream (frontier, scheduling, prerequisites) trusts the
 ledgers, and free-form markdown maintained across many sessions will
 drift. This tool makes drift visible.
 
-Canonical layout (protocol v2): a learning root containing registry.md
-plus one workspace subfolder per mission, each with its own LEDGER.md.
-Prerequisites may cross workspaces ("finance:N01"); they resolve through
-the registry. See LEDGER-FORMAT.md.
+Canonical layout (protocol v3): a learning root containing registry.md
+plus one workspace subfolder per mission. The workspace root is the
+learner's surface (MISSION.md, GLOSSARY.md, map.html, lessons/,
+reference/); the agent's state lives in system/ (LEDGER.md, NOTES.md,
+NEXT.md, RESOURCES.md, probes/). Prerequisites may cross workspaces
+("finance:N01"); they resolve through the registry. See LEDGER-FORMAT.md.
 
 Usage:
-  python3 scripts/ledger_tools.py check [--ledger LEDGER.md] [--root DIR]
+  python3 scripts/ledger_tools.py check [--ledger system/LEDGER.md] [--root DIR]
   python3 scripts/ledger_tools.py today [--root DIR]
-  python3 scripts/ledger_tools.py map   [--ledger LEDGER.md] [--out map.html]
+  python3 scripts/ledger_tools.py map   [--ledger system/LEDGER.md] [--out map.html]
   python3 scripts/ledger_tools.py map   --all [--root DIR] [--out map.html]
 
 `check` exits non-zero on errors. Run it at every session open and fix
@@ -40,7 +42,7 @@ try:
 except ImportError:
     retrievability = None
 
-PROTOCOL_VERSION = 2
+PROTOCOL_VERSION = 3
 
 NODE_RE = re.compile(r"^###\s+(N\d+)\s*[·:\-]\s*(.+?)\s*$")
 PROTOCOL_RE = re.compile(r"^protocol:\s*(\d+)\s*$")
@@ -159,14 +161,25 @@ def load_root(root):
     "protocol"}, in registry order."""
     root = os.path.abspath(root)
     registry, problems, protocol = parse_registry(os.path.join(root, "registry.md"))
-    if registry and protocol != PROTOCOL_VERSION:
-        problems.append(("warning",
-                         f"registry.md protocol is {protocol or 'missing'} — "
-                         f"expected 'protocol: {PROTOCOL_VERSION}'"))
+    if registry:
+        if protocol is None:
+            problems.append(("warning",
+                             "registry.md has no 'protocol:' line — add "
+                             f"'protocol: {PROTOCOL_VERSION}'"))
+        elif protocol > PROTOCOL_VERSION:
+            problems.append(("error",
+                             f"registry protocol v{protocol} is newer than this "
+                             f"skill supports (v{PROTOCOL_VERSION}) — update the "
+                             "skill, don't edit the registry"))
+        elif protocol < PROTOCOL_VERSION:
+            problems.append(("error",
+                             f"registry protocol v{protocol} is unsupported — v"
+                             f"{PROTOCOL_VERSION} has no migration path; rebuild "
+                             "the learning root (LEDGER-FORMAT.md)"))
     workspaces = {}
     for name, ws in registry.items():
         wdir = os.path.join(root, ws["fields"].get("path", name))
-        ledger = os.path.join(wdir, "LEDGER.md")
+        ledger = os.path.join(wdir, "system", "LEDGER.md")
         nodes, agency, wproblems, wprotocol = parse_ledger(ledger)
         workspaces[name] = {"name": name, "dir": wdir, "ledger": ledger,
                             "fields": ws["fields"], "nodes": nodes,
@@ -175,9 +188,16 @@ def load_root(root):
     return workspaces, problems
 
 
+def workspace_dir(ledger_path):
+    """The canonical layout is root/workspace/system/LEDGER.md, so the
+    workspace is the ledger's grandparent directory."""
+    return os.path.dirname(os.path.dirname(os.path.abspath(ledger_path)))
+
+
 def find_root(ws_dir):
-    """The canonical layout is exactly root/workspace/LEDGER.md, so the
-    root is the workspace's parent — if it holds a registry.md."""
+    """The root is the workspace's immediate parent — if it holds a
+    registry.md. No walking further up: that would risk latching onto an
+    unrelated registry."""
     parent = os.path.dirname(os.path.abspath(ws_dir))
     if os.path.isfile(os.path.join(parent, "registry.md")):
         return parent
@@ -391,9 +411,9 @@ def cmd_check(args):
         errors.append(("error",
                        f"ledger protocol v{protocol} is unsupported — v"
                        f"{PROTOCOL_VERSION} has no migration path; rebuild "
-                       "the workspace under a learning root (LEDGER-FORMAT.md)"))
+                       "the workspace (LEDGER-FORMAT.md)"))
 
-    ws_dir = os.path.dirname(ledger_path)
+    ws_dir = workspace_dir(ledger_path)
     root = os.path.abspath(args.root) if args.root else find_root(ws_dir)
     workspaces, own_name = None, None
     if root:
@@ -601,7 +621,8 @@ def cmd_map(args):
     nodes, agency, problems, _protocol = parse_ledger(args.ledger)
     if any(p[0] == "error" for p in problems):
         print("ledger has parse errors - run `check` first", file=sys.stderr)
-    root = find_root(os.path.dirname(os.path.abspath(args.ledger)))
+    ws_dir = workspace_dir(args.ledger)
+    root = find_root(ws_dir)
     workspaces = load_root(root)[0] if root else None
     resolve = make_resolver(nodes, workspaces)
 
@@ -609,7 +630,9 @@ def cmd_map(args):
     body += (f"<div class='agency'><strong>Agency log:</strong> "
              f"{agency_trend(agency, today)} - a training log, not a "
              "conscience.</div>")
-    out = args.out or "map.html"
+    # the map is the learner's surface: it lands in the workspace root,
+    # not in system/
+    out = args.out or os.path.join(ws_dir, "map.html")
     with open(out, "w", encoding="utf-8") as fh:
         fh.write(map_doc("Capability map", today, body))
     print(f"wrote {out} ({len(nodes)} nodes)")
@@ -659,8 +682,8 @@ def main():
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    pc = sub.add_parser("check", help="validate a workspace LEDGER.md")
-    pc.add_argument("--ledger", default="LEDGER.md")
+    pc = sub.add_parser("check", help="validate a workspace's system/LEDGER.md")
+    pc.add_argument("--ledger", default=os.path.join("system", "LEDGER.md"))
     pc.add_argument("--root", help="learning root (default: the workspace's parent)")
     pc.add_argument("--date", help="override today, YYYY-MM-DD")
     pc.set_defaults(fn=cmd_check)
@@ -672,12 +695,13 @@ def main():
     pt.set_defaults(fn=cmd_today)
 
     pm = sub.add_parser("map", help="render map.html (one workspace, or --all)")
-    pm.add_argument("--ledger", default="LEDGER.md")
+    pm.add_argument("--ledger", default=os.path.join("system", "LEDGER.md"))
     pm.add_argument("--all", action="store_true",
                     help="aggregate map across the learning root")
     pm.add_argument("--root", help="learning root for --all (default: auto-discover)")
     pm.add_argument("--out", default=None,
-                    help="output path (default: map.html; for --all, <root>/map.html)")
+                    help="output path (default: <workspace>/map.html; "
+                         "for --all, <root>/map.html)")
     pm.add_argument("--date", help="override today, YYYY-MM-DD")
     pm.set_defaults(fn=cmd_map)
 
